@@ -1,0 +1,14 @@
+| 일련번호 | 심각도 | 파일 | 위치 | 문제 | 권고사항 |
+|---|---|---|---|---|---|
+| 1 | High | `frontend/app/(site)/events/[eventId]/page.tsx` | `fetch(..., { cache: "no-store" })` (대략 18–20행) | 서버 컴포넌트가 동일 앱의 Route Handler(`/api/events/[eventId]`)를 HTTP로 호출해 요청당 왕복·직렬화 비용이 한 번 더 듭니다. | 이벤트 상세 데이터는 RSC에서 `createServerSupabaseClient()`로 직접 조회하거나, 공통 로더를 `unstable_cache`/태그 재검증으로 감싸 중복·캐시 정책을 한 곳에서 관리합니다. |
+| 2 | Medium | `frontend/app/api/events/[eventId]/route.ts` | `events`·`responses` 쿼리 (대략 20–45행) | `.select("*")`로 스키마에 불필요한 컬럼이 생겨도 모두 전달·직렬화됩니다. | API·직렬화에 필요한 컬럼만 명시 선택해 페이로드와 DB 부하를 줄입니다. |
+| 3 | Medium | `frontend/app/api/events/route.ts` | `insert(...).select().single()` (대략 32–41행) | `.select()`에 컬럼을 지정하지 않아 삽입 행 전체가 반환됩니다. | `eventRowToApi`에 맞춰 필요한 컬럼만 `.select("id, title, ...")` 형태로 제한합니다. |
+| 4 | Medium | `frontend/app/api/events/[eventId]/responses/route.ts` | `ensureEventExists` 후 `insert`/`update` (POST·PUT 각각) | 요청마다 이벤트 존재 확인 쿼리와 변경 쿼리가 순차 실행되어 왕복이 둘로 나뉩니다. | FK/유니크 제약과 에러 코드(이미 23505·23503 처리)만으로 충분한지 검토하고, 선행 `select`를 제거하거나 단일 RPC로 합치는 방안을 검토합니다. |
+| 5 | Medium | `frontend/components/event-detail-client.tsx` | `AvailabilityGrid`에 전달하는 `onChange` (대략 281–286행) | 인라인 함수 `(updater) => setSelectedKeys(...)`가 매 렌더마다 새 참조가 되어, 자식의 `useCallback(..., [onChange])` 의존 값이 바뀝니다. | `useCallback`으로 `onChange`를 안정화하거나, `AvailabilityGrid`에서 `setSelectedKeys` 패턴에 맞게 props 설계를 조정합니다. |
+| 6 | Medium | `frontend/components/heatmap.tsx` | 셀 렌더 루프 내 `namesForSlot` (대략 94–96행) | 날짜×시간×응답마다 응답 배열과 슬롯 배열을 다시 훑어 복잡도가 그리드×응답×슬롯에 가깝습니다. | 슬롯 키별 인덱스(맵)를 한 번만 만들어 셀에서는 조회만 하거나, 응답 수·슬롯 수가 커질 때를 대비해 `useMemo`로 전처리합니다. |
+| 7 | Medium | `frontend/package.json` | 의존성 `framer-motion` | 소스에서 `framer-motion` import가 없어 번들에 포함되지 않을 수 있으나, 미사용 의존성으로 유지보수·설치 비용이 남습니다. | 실제 사용 계획이 없으면 제거하고, 필요 시 해당 컴포넌트 도입과 함께 추가합니다. |
+| 8 | Medium | `frontend/components/landing-background.tsx` 등 | `FluidParticles` 정적 import | 랜딩 배경 캔버스·입자 시뮬레이션이 초기 번들·메인 스레드에 함께 실립니다. | 히어로 아래·비필수 영역이면 `next/dynamic`으로 클라이언트 전용·로딩 분리를 검토합니다. |
+| 9 | Medium | `frontend/components/fluid-particles.tsx` | `drawFrame` 내 이중 루프(대략 347–366행) | 입자 간 연결선을 그릴 때 O(n²)에 가까운 연산이 매 프레임 수행되어, 해상도·밀도가 크면 프레임 드롭이 날 수 있습니다. | 링크 거리 기반 공간 분할·입자 수 상한·`requestAnimationFrame` 밖의 작업 분리 등으로 단계적으로 완화합니다. |
+| 10 | Medium | `frontend/app/layout.tsx` | `Geist_Mono` 및 `--font-geist-mono` | 루트에 변수는 주입되나, 본문은 `--font-sans` 위주이고 코드에서 `font-mono` 사용이 거의 없으면 모노 폰트 로드가 상대적으로 덜 쓰일 수 있습니다. | 실제 UI에서 모노스페이스가 필요한 곳에만 쓰이는지 확인하고, 불필요하면 폰트 하나를 빼 번들·네트워크를 줄입니다. |
+| 11 | N/A | 검토 범위 `frontend/` | 래스터 `next/image` 사용처 | 현재 코드베이스에서 `next/image` 사용이 없습니다. | 래스터 이미지를 도입할 때 `next/image`와 크기·`sizes`를 지정해 CLS와 전송량을 관리합니다. |
+| 12 | N/A | 검토 범위 `frontend/` | 동일 키 중복 fetch | 페이지 단위에서 같은 API를 반복 호출하는 패턴은 이벤트 상세 외에 두드러지지 않습니다. | 클라이언트에서 목록·상세를 동시에 붙일 때는 SWR/React Query 등으로 키·중복 요청을 정리합니다. |

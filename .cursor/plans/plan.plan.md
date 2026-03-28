@@ -34,7 +34,7 @@ isProject: false
 
 # WhenWeMeet — 개발 계획서
 
-> 참조 문서: [spec.md](../../spec.md) · [api-spec.md](../../api-spec.md)
+> 참조 문서: [spec.md](../../docs/spec.md) · [api-spec.md](../../docs/api-spec.md)
 
 위 **todos**는 Cursor Plan에서 진행 상태를 추적한다. 아래 본문은 상세 체크리스트다.
 

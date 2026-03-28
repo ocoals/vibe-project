@@ -8,7 +8,7 @@
 - **참여자 응답**: 링크로 접속해 이름 입력 후 격자에서 가능한 시간 선택·수정
 - **결과 확인**: 슬롯별 참여 인원 히트맵, 전원 가능 시간 하이라이트 등
 
-자세한 화면·API·데이터 모델은 저장소 루트의 [`spec.md`](./spec.md), [`api-spec.md`](./api-spec.md)를 참고하세요.
+자세한 화면·API·데이터 모델은 [`docs/spec.md`](./docs/spec.md), [`docs/api-spec.md`](./docs/api-spec.md)를 참고하세요.
 
 ## 기술 스택
 
@@ -70,8 +70,9 @@ vibe-project/
 │   ├── components/    # UI 컴포넌트
 │   └── lib/           # 유틸·Supabase 클라이언트 등
 ├── supabase/          # Supabase 관련 설정·마이그레이션 등
-├── spec.md            # 제품 명세
-└── api-spec.md        # API 명세
+└── docs/              # 제품·API 명세, 에이전트 가이드 등
+    ├── spec.md        # 제품 명세
+    └── api-spec.md    # API 명세
 ```
 
 ## 라이선스
