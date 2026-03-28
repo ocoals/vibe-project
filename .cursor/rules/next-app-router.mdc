@@ -1,0 +1,17 @@
+---
+description: Next.js App Router 라우팅·API 라우트 규칙
+globs: app/**/*.ts,app/**/*.tsx
+alwaysApply: false
+---
+
+# App Router
+
+## 반드시 지킬 것
+
+- 라우팅·레이아웃·로딩·에러 UI는 **`app/`** 구조에 맞게 구성합니다 (`page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx` 등).
+- HTTP API는 App Router의 **Route Handlers** (`route.ts`)로 작성합니다.
+
+## 하지 말 것
+
+- **`pages/`** 디렉터리로 새 페이지·API를 만들지 않습니다.
+- **`getServerSideProps`**, **`getStaticProps`**, **`getInitialProps`** 등 Pages Router 데이터 패턴을 도입하지 않습니다.

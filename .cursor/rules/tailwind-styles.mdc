@@ -1,0 +1,18 @@
+---
+description: Tailwind CSS 및 UI·접근성 규칙
+globs: "**/*.tsx,**/*.css"
+alwaysApply: false
+---
+
+# 스타일 (Tailwind)
+
+## 반드시 지킬 것
+
+- UI는 **Tailwind 유틸리티 클래스**를 기본으로 합니다.
+- 레이아웃·반응형은 Tailwind로 맞춥니다.
+- **시맨틱 HTML**, 이미지 **`alt`**, 키보드 **포커스** 등 접근성 기본을 고려합니다.
+- 전역 베이스·디자인 토큰은 `globals.css` 등 **소량**으로 두는 것은 허용합니다.
+
+## 하지 말 것
+
+- Tailwind 없이 **대규모 UI**를 인라인 `<style>`·CSS Modules·전역 CSS **만**으로 구성하지 않습니다.
