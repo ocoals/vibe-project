@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils";
 import {
   calendarGridClass,
   calendarHeaderClass,
-  calendarHeadingClass,
   calendarManualCellClasses,
+  calendarManualPickerHeadingClass,
+  calendarManualPickerWeekdayHeaderCellClass,
   calendarNavButtonClass,
   calendarRootClass,
-  calendarWeekdayHeaderCellClass,
 } from "@/components/ui/calendar-classes";
 
 function toDateKey(d: Date): string {
@@ -96,8 +96,7 @@ function CalendarPickerInner({ selectedDates, onChange }: CalendarPickerProps) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950",
-        "@container",
+        "@container w-full min-w-84 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950",
       )}
     >
       <div className={cn(calendarRootClass, "max-w-none")}>
@@ -109,7 +108,7 @@ function CalendarPickerInner({ selectedDates, onChange }: CalendarPickerProps) {
               <ChevronLeftIcon className="size-[18px]" aria-hidden />
             )}
           </button>
-          <div className={calendarHeadingClass}>
+          <div className={calendarManualPickerHeadingClass}>
             {year}년 {month + 1}월
           </div>
           <button type="button" onClick={goNext} className={calendarNavButtonClass} aria-label="다음 달">
@@ -125,7 +124,7 @@ function CalendarPickerInner({ selectedDates, onChange }: CalendarPickerProps) {
           <thead>
             <tr>
               {WEEKDAYS.map((w) => (
-                <th key={w} scope="col" className={calendarWeekdayHeaderCellClass}>
+                <th key={w} scope="col" className={calendarManualPickerWeekdayHeaderCellClass}>
                   {w}
                 </th>
               ))}
@@ -151,6 +150,7 @@ function CalendarPickerInner({ selectedDates, onChange }: CalendarPickerProps) {
                         className={calendarManualCellClasses({
                           isSelected: selected,
                           isToday: isTodayCell,
+                          size: "lg",
                         })}
                         aria-pressed={selected}
                         aria-label={`${parseDateKey(dateKey).toLocaleDateString("ko-KR")}${selected ? ", 선택됨" : ""}`}

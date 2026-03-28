@@ -21,9 +21,18 @@ export const calendarNavButtonClass = cn(
 export const calendarHeadingClass =
   "mx-2 my-0 flex-1 text-center text-base font-semibold [font-variation-settings:normal] text-zinc-900 dark:text-zinc-100";
 
+/** 수동 달력(CalendarPicker) 큰 셀 variant용 월/년 제목 */
+export const calendarManualPickerHeadingClass = cn(calendarHeadingClass, "text-lg");
+
 /** 요일 행 */
 export const calendarWeekdayHeaderCellClass =
   "px-0 py-1 text-xs font-semibold text-zinc-500 dark:text-zinc-400";
+
+/** 수동 달력(CalendarPicker) 큰 셀 variant용 요일 헤더 */
+export const calendarManualPickerWeekdayHeaderCellClass = cn(
+  calendarWeekdayHeaderCellClass,
+  "text-sm",
+);
 
 /** 그리드 테이블 */
 export const calendarGridClass = "w-full border-spacing-0";
@@ -33,7 +42,16 @@ export const calendarGridClass = "w-full border-spacing-0";
  * RAC `CalendarCell`에는 `calendarCellClasses`를 사용합니다.
  */
 export const calendarCellBaseClass = cn(
-  "flex h-10 w-[calc(100cqw/7)] max-h-10 cursor-default items-center justify-center rounded-lg text-sm outline-none [-webkit-tap-highlight-color:transparent]",
+  "flex h-10 min-w-10 w-[calc(100cqw/7)] max-h-10 cursor-default items-center justify-center rounded-lg text-sm outline-none [-webkit-tap-highlight-color:transparent]",
+  "aspect-square forced-color-adjust-none transition-[color,background-color,transform]",
+  "data-[outside-month]:hidden",
+);
+
+/**
+ * 수동 날짜 그리드 전용 큰 셀 (CalendarPicker 등). RAC `calendarCellBaseClass`는 그대로 둡니다.
+ */
+export const calendarManualCellBaseLargeClass = cn(
+  "flex h-12 min-w-12 w-[calc(100cqw/7)] max-h-12 cursor-default items-center justify-center rounded-lg text-base outline-none [-webkit-tap-highlight-color:transparent]",
   "aspect-square forced-color-adjust-none transition-[color,background-color,transform]",
   "data-[outside-month]:hidden",
 );
@@ -81,11 +99,14 @@ export function calendarCellClasses(props: CalendarCellRenderProps): string {
 export function calendarManualCellClasses(options: {
   isSelected: boolean;
   isToday: boolean;
+  size?: "default" | "lg";
 }): string {
-  const { isSelected, isToday } = options;
+  const { isSelected, isToday, size = "default" } = options;
+  const cellBase =
+    size === "lg" ? calendarManualCellBaseLargeClass : calendarCellBaseClass;
 
   return cn(
-    calendarCellBaseClass,
+    cellBase,
     isSelected &&
       "rounded-lg bg-zinc-900 font-medium text-white dark:bg-zinc-100 dark:text-zinc-900",
     !isSelected &&

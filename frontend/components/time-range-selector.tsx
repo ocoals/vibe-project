@@ -19,8 +19,8 @@ export function TimeRangeSelector({
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className="block">
+      <div className="flex flex-col gap-3">
+        <label className="block w-full max-w-xs sm:max-w-sm">
           <span className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             시작 시간
           </span>
@@ -36,7 +36,7 @@ export function TimeRangeSelector({
             ))}
           </select>
         </label>
-        <label className="block">
+        <label className="block w-full max-w-xs sm:max-w-sm">
           <span className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             종료 시간
           </span>

@@ -94,19 +94,21 @@ export function CreateEventForm() {
         />
       </div>
 
-      <div>
-        <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">후보 날짜</p>
-        <CalendarPicker selectedDates={selectedDates} onChange={setSelectedDates} />
-      </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(22rem,1.2fr)_minmax(16rem,1fr)] lg:items-start lg:gap-8">
+        <div>
+          <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">후보 날짜</p>
+          <CalendarPicker selectedDates={selectedDates} onChange={setSelectedDates} />
+        </div>
 
-      <div>
-        <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">후보 시간 범위 (30분 단위)</p>
-        <TimeRangeSelector
-          startTime={startTime}
-          endTime={endTime}
-          onStartChange={setStartTime}
-          onEndChange={setEndTime}
-        />
+        <div className="min-w-0">
+          <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">후보 시간 범위 (30분 단위)</p>
+          <TimeRangeSelector
+            startTime={startTime}
+            endTime={endTime}
+            onStartChange={setStartTime}
+            onEndChange={setEndTime}
+          />
+        </div>
       </div>
 
       <button
