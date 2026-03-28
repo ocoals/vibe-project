@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { responseRowToApi } from "@/lib/api/serialize";
 import { parseUpsertResponseBody } from "@/lib/api/validation";
+import { supabaseEnvMissingResponse } from "@/lib/supabase/route-env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const DUPLICATE_RESPONSE =
@@ -48,6 +49,11 @@ export async function POST(
 
   const { participant_name, available_slots } = parsed.value;
 
+  const envBlockPost = supabaseEnvMissingResponse();
+  if (envBlockPost) {
+    return envBlockPost;
+  }
+
   try {
     const supabase = createServerSupabaseClient();
 
@@ -90,7 +96,7 @@ export async function POST(
   } catch (e) {
     console.error("[POST .../responses]", e);
     return NextResponse.json(
-      { error: "서버 설정을 확인하세요." },
+      { error: "요청을 처리하지 못했습니다." },
       { status: 500 },
     );
   }
@@ -119,6 +125,11 @@ export async function PUT(
 
   const { participant_name, available_slots } = parsed.value;
   const updated_at = new Date().toISOString();
+
+  const envBlockPut = supabaseEnvMissingResponse();
+  if (envBlockPut) {
+    return envBlockPut;
+  }
 
   try {
     const supabase = createServerSupabaseClient();
@@ -158,7 +169,7 @@ export async function PUT(
   } catch (e) {
     console.error("[PUT .../responses]", e);
     return NextResponse.json(
-      { error: "서버 설정을 확인하세요." },
+      { error: "요청을 처리하지 못했습니다." },
       { status: 500 },
     );
   }

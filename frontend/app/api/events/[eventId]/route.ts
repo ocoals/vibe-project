@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { eventRowToApi, responseRowToApi } from "@/lib/api/serialize";
+import { supabaseEnvMissingResponse } from "@/lib/supabase/route-env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function GET(
@@ -7,6 +8,11 @@ export async function GET(
   context: { params: Promise<{ eventId: string }> },
 ) {
   const { eventId } = await context.params;
+
+  const envBlock = supabaseEnvMissingResponse();
+  if (envBlock) {
+    return envBlock;
+  }
 
   try {
     const supabase = createServerSupabaseClient();
@@ -53,7 +59,7 @@ export async function GET(
   } catch (e) {
     console.error("[GET /api/events/[eventId]]", e);
     return NextResponse.json(
-      { error: "서버 설정을 확인하세요." },
+      { error: "요청을 처리하지 못했습니다." },
       { status: 500 },
     );
   }

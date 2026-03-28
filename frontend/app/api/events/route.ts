@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { parseCreateEventBody } from "@/lib/api/validation";
 import { eventRowToApi } from "@/lib/api/serialize";
+import { supabaseEnvMissingResponse } from "@/lib/supabase/route-env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
@@ -20,6 +21,11 @@ export async function POST(request: Request) {
   }
 
   const { title, dates, start_time, end_time } = parsed.value;
+
+  const envBlock = supabaseEnvMissingResponse();
+  if (envBlock) {
+    return envBlock;
+  }
 
   try {
     const supabase = createServerSupabaseClient();
@@ -58,7 +64,7 @@ export async function POST(request: Request) {
   } catch (e) {
     console.error("[POST /api/events]", e);
     return NextResponse.json(
-      { error: "서버 설정을 확인하세요." },
+      { error: "요청을 처리하지 못했습니다." },
       { status: 500 },
     );
   }
