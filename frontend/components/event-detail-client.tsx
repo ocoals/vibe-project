@@ -48,6 +48,12 @@ export function EventDetailClient({ event, initialResponses }: EventDetailClient
     [event.dates],
   );
 
+  const existingForTypedName = useMemo(() => {
+    const n = participantName.trim().toLowerCase();
+    if (!n) return undefined;
+    return responses.find((r) => r.participant_name.trim().toLowerCase() === n);
+  }, [participantName, responses]);
+
   function handleJoin() {
     setBanner(null);
     setSubmitError(null);
@@ -66,7 +72,6 @@ export function EventDetailClient({ event, initialResponses }: EventDetailClient
       setSelectedKeys(keysFromSlots(existing.available_slots));
       setIsEditMode(true);
     } else {
-      setSelectedKeys(new Set());
       setIsEditMode(false);
     }
     setHasJoined(true);
@@ -75,8 +80,12 @@ export function EventDetailClient({ event, initialResponses }: EventDetailClient
   async function handleSubmit() {
     setBanner(null);
     setSubmitError(null);
+    setNameError(null);
     const name = participantName.trim();
-    if (!name || !hasJoined) return;
+    if (!name) {
+      setNameError("이름을 입력해 주세요.");
+      return;
+    }
 
     const slots = slotsFromKeys(selectedKeys);
     const body = JSON.stringify({
@@ -84,9 +93,13 @@ export function EventDetailClient({ event, initialResponses }: EventDetailClient
       available_slots: slots,
     });
 
+    const existingForName = responses.find(
+      (r) => r.participant_name.trim().toLowerCase() === name.toLowerCase(),
+    );
+
     setIsSubmitting(true);
     try {
-      if (isEditMode) {
+      if (existingForName) {
         const res = await fetch(`/api/events/${encodeURIComponent(event.id)}/responses`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -111,6 +124,8 @@ export function EventDetailClient({ event, initialResponses }: EventDetailClient
           ),
         );
         setBanner("응답을 수정했습니다.");
+        setHasJoined(true);
+        setIsEditMode(true);
       } else {
         const res = await fetch(`/api/events/${encodeURIComponent(event.id)}/responses`, {
           method: "POST",
@@ -132,6 +147,7 @@ export function EventDetailClient({ event, initialResponses }: EventDetailClient
         const created = payload as Response;
         setResponses((prev) => [...prev, created]);
         setBanner("응답을 등록했습니다.");
+        setHasJoined(true);
         setIsEditMode(true);
       }
     } catch {
@@ -140,6 +156,8 @@ export function EventDetailClient({ event, initialResponses }: EventDetailClient
       setIsSubmitting(false);
     }
   }
+
+  const submitLabel = existingForTypedName ? "수정 제출" : "제출";
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:py-14">
@@ -175,7 +193,9 @@ export function EventDetailClient({ event, initialResponses }: EventDetailClient
           내 가능 시간
         </h2>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          이름을 입력한 뒤 참여하기를 누르면 격자에서 시간을 고를 수 있습니다.
+          격자에서 가능한 시간을 고르고 이름을 입력한 뒤 제출하세요. 이미 응답한 이름이면{" "}
+          <span className="font-medium text-zinc-800 dark:text-zinc-200">참여하기</span>로 기존
+          선택을 불러올 수 있습니다.
         </p>
 
         {banner && (
@@ -253,22 +273,28 @@ export function EventDetailClient({ event, initialResponses }: EventDetailClient
         )}
 
         <div className="mt-6">
-          <AvailabilityGrid
-            dates={sortedDates}
-            timeSlots={timeSlots}
-            selectedKeys={selectedKeys}
-            onChange={(updater) => setSelectedKeys((prev) => updater(prev))}
-            disabled={!hasJoined}
-          />
+          {sortedDates.length === 0 || timeSlots.length === 0 ? (
+            <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-100">
+              후보 날짜 또는 시간 범위가 없어 격자를 표시할 수 없습니다. 이벤트 설정을 확인해 주세요.
+            </p>
+          ) : (
+            <AvailabilityGrid
+              dates={sortedDates}
+              timeSlots={timeSlots}
+              selectedKeys={selectedKeys}
+              onChange={(updater) => setSelectedKeys((prev) => updater(prev))}
+              disabled={false}
+            />
+          )}
         </div>
 
         <button
           type="button"
           onClick={() => void handleSubmit()}
-          disabled={!hasJoined || isSubmitting}
+          disabled={!participantName.trim() || isSubmitting}
           className="mt-6 rounded-xl bg-zinc-900 px-8 py-3 text-sm font-semibold text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
         >
-          {isSubmitting ? "제출 중…" : isEditMode ? "수정 제출" : "제출"}
+          {isSubmitting ? "제출 중…" : submitLabel}
         </button>
       </section>
 

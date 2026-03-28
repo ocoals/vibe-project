@@ -13,8 +13,10 @@ export const HALF_HOUR_TIMES: string[] = (() => {
   return out;
 })();
 
+/** `HH:mm` 또는 DB에서 온 `HH:mm:ss` 등 — 앞 `HH:mm`만 사용 */
 export function timeToMinutes(t: string): number {
-  const [h, m] = t.split(":").map(Number);
+  const head = t.length >= 5 ? t.slice(0, 5) : t;
+  const [h, m] = head.split(":").map(Number);
   return h * 60 + m;
 }
 

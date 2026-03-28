@@ -1,6 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Dr_Sugiyama, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
+const drSugiyama = Dr_Sugiyama({
+  variable: "--font-brand",
+  subsets: ["latin"],
+  weight: "400",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +46,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`${geistSans.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
+      className={`${drSugiyama.variable} ${geistSans.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full bg-background text-foreground">

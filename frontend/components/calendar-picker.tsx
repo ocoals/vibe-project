@@ -1,6 +1,20 @@
 "use client";
 
+import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import { getLocalTimeZone, today } from "@internationalized/date";
 import { useMemo, useState } from "react";
+import { I18nProvider, useLocale } from "react-aria-components";
+
+import { cn } from "@/lib/utils";
+import {
+  calendarGridClass,
+  calendarHeaderClass,
+  calendarHeadingClass,
+  calendarManualCellClasses,
+  calendarNavButtonClass,
+  calendarRootClass,
+  calendarWeekdayHeaderCellClass,
+} from "@/components/ui/calendar-classes";
 
 function toDateKey(d: Date): string {
   const y = d.getFullYear();
@@ -21,7 +35,14 @@ type CalendarPickerProps = {
   onChange: (dates: string[]) => void;
 };
 
-export function CalendarPicker({ selectedDates, onChange }: CalendarPickerProps) {
+function todayDateKey(): string {
+  const t = today(getLocalTimeZone());
+  return `${t.year}-${String(t.month).padStart(2, "0")}-${String(t.day).padStart(2, "0")}`;
+}
+
+function CalendarPickerInner({ selectedDates, onChange }: CalendarPickerProps) {
+  const { direction } = useLocale();
+
   const [view, setView] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -40,6 +61,22 @@ export function CalendarPicker({ selectedDates, onChange }: CalendarPickerProps)
 
   const selectedSet = useMemo(() => new Set(selectedDates), [selectedDates]);
 
+  const todayKey = useMemo(() => todayDateKey(), []);
+
+  const weeks = useMemo(() => {
+    const cells: Array<number | "blank"> = [
+      ...Array.from({ length: leadingBlanks }, () => "blank" as const),
+      ...Array.from({ length: days }, (_, i) => i + 1),
+    ];
+    const trailing = (7 - (cells.length % 7)) % 7;
+    for (let i = 0; i < trailing; i++) cells.push("blank");
+    const rows: Array<Array<number | "blank">> = [];
+    for (let i = 0; i < cells.length; i += 7) {
+      rows.push(cells.slice(i, i + 7));
+    }
+    return rows;
+  }, [leadingBlanks, days]);
+
   function toggleDay(day: number) {
     const key = toDateKey(new Date(year, month, day));
     const next = new Set(selectedSet);
@@ -56,67 +93,79 @@ export function CalendarPicker({ selectedDates, onChange }: CalendarPickerProps)
     setView(new Date(year, month + 1, 1));
   }
 
-  const todayKey = toDateKey(new Date());
-
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-      <div className="mb-3 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={goPrev}
-          className="rounded-lg px-2 py-1 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
-          aria-label="이전 달"
-        >
-          ‹
-        </button>
-        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-          {year}년 {month + 1}월
-        </span>
-        <button
-          type="button"
-          onClick={goNext}
-          className="rounded-lg px-2 py-1 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
-          aria-label="다음 달"
-        >
-          ›
-        </button>
-      </div>
-      <div className="grid grid-cols-7 gap-1 text-center text-xs text-zinc-500 dark:text-zinc-400">
-        {WEEKDAYS.map((w) => (
-          <div key={w} className="py-1 font-medium">
-            {w}
+    <div
+      className={cn(
+        "rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950",
+        "@container",
+      )}
+    >
+      <div className={cn(calendarRootClass, "max-w-none")}>
+        <header className={calendarHeaderClass}>
+          <button type="button" onClick={goPrev} className={calendarNavButtonClass} aria-label="이전 달">
+            {direction === "rtl" ? (
+              <ChevronRightIcon className="size-[18px]" aria-hidden />
+            ) : (
+              <ChevronLeftIcon className="size-[18px]" aria-hidden />
+            )}
+          </button>
+          <div className={calendarHeadingClass}>
+            {year}년 {month + 1}월
           </div>
-        ))}
-        {Array.from({ length: leadingBlanks }, (_, i) => (
-          <div key={`blank-${i}`} />
-        ))}
-        {Array.from({ length: days }, (_, i) => {
-          const day = i + 1;
-          const key = toDateKey(new Date(year, month, day));
-          const selected = selectedSet.has(key);
-          const isToday = key === todayKey;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => toggleDay(day)}
-              className={[
-                "aspect-square max-h-10 rounded-lg text-sm transition-colors",
-                selected
-                  ? "bg-zinc-900 font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
-                  : "text-zinc-800 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800",
-                isToday && !selected ? "ring-2 ring-zinc-400 ring-offset-1 dark:ring-zinc-500" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              aria-pressed={selected}
-              aria-label={`${parseDateKey(key).toLocaleDateString("ko-KR")}${selected ? ", 선택됨" : ""}`}
-            >
-              {day}
-            </button>
-          );
-        })}
+          <button type="button" onClick={goNext} className={calendarNavButtonClass} aria-label="다음 달">
+            {direction === "rtl" ? (
+              <ChevronLeftIcon className="size-[18px]" aria-hidden />
+            ) : (
+              <ChevronRightIcon className="size-[18px]" aria-hidden />
+            )}
+          </button>
+        </header>
+
+        <table className={calendarGridClass}>
+          <thead>
+            <tr>
+              {WEEKDAYS.map((w) => (
+                <th key={w} scope="col" className={calendarWeekdayHeaderCellClass}>
+                  {w}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {weeks.map((week, wi) => (
+              <tr key={wi}>
+                {week.map((cell, ci) => {
+                  if (cell === "blank") {
+                    return (
+                      <td key={`${wi}-${ci}`} className="p-0 align-middle" />
+                    );
+                  }
+                  const dateKey = toDateKey(new Date(year, month, cell));
+                  const selected = selectedSet.has(dateKey);
+                  const isTodayCell = dateKey === todayKey;
+                  return (
+                    <td key={dateKey} className="p-0 align-middle">
+                      <button
+                        type="button"
+                        onClick={() => toggleDay(cell)}
+                        className={calendarManualCellClasses({
+                          isSelected: selected,
+                          isToday: isTodayCell,
+                        })}
+                        aria-pressed={selected}
+                        aria-label={`${parseDateKey(dateKey).toLocaleDateString("ko-KR")}${selected ? ", 선택됨" : ""}`}
+                      >
+                        {cell}
+                      </button>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+
       {selectedDates.length > 0 && (
         <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
           선택 {selectedDates.length}일 ·{" "}
@@ -126,5 +175,13 @@ export function CalendarPicker({ selectedDates, onChange }: CalendarPickerProps)
         </p>
       )}
     </div>
+  );
+}
+
+export function CalendarPicker(props: CalendarPickerProps) {
+  return (
+    <I18nProvider locale="ko-KR">
+      <CalendarPickerInner {...props} />
+    </I18nProvider>
   );
 }

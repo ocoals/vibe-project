@@ -35,11 +35,23 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      console.error("[POST /api/events]", error);
-      return NextResponse.json(
-        { error: "이벤트를 생성하지 못했습니다." },
-        { status: 500 },
-      );
+      console.error("[POST /api/events]", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      });
+      const body: {
+        error: string;
+        debug?: { code: string; message: string };
+      } = { error: "이벤트를 생성하지 못했습니다." };
+      if (process.env.NODE_ENV === "development") {
+        body.debug = {
+          code: error.code ?? "",
+          message: error.message,
+        };
+      }
+      return NextResponse.json(body, { status: 500 });
     }
 
     return NextResponse.json(eventRowToApi(data), { status: 201 });

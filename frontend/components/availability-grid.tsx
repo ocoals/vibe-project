@@ -62,7 +62,7 @@ export function AvailabilityGrid({
     <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
       <div
         className="inline-block min-w-full select-none p-2"
-        style={{ touchAction: "none" }}
+        style={{ touchAction: "manipulation" }}
       >
         <div
           className="grid gap-px bg-zinc-200 dark:bg-zinc-700"
@@ -87,27 +87,29 @@ export function AvailabilityGrid({
               {dates.map((date) => {
                 const key = slotKey(date, time);
                 const on = selectedKeys.has(key);
+                const cellBase =
+                  "min-h-9 min-w-9 rounded-sm border transition-colors duration-75 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-zinc-950";
+                let cellState: string;
+                if (disabled) {
+                  cellState =
+                    "cursor-not-allowed border-transparent bg-zinc-100 opacity-50 dark:bg-zinc-900";
+                } else if (on) {
+                  cellState =
+                    "cursor-pointer border-emerald-600 bg-emerald-500 shadow-inner hover:bg-emerald-400 active:bg-emerald-600 dark:border-emerald-500 dark:bg-emerald-600 dark:hover:bg-emerald-500 dark:active:bg-emerald-700";
+                } else {
+                  cellState =
+                    "cursor-pointer border-zinc-200/80 bg-white hover:border-emerald-300 hover:bg-emerald-100 active:bg-emerald-200 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/80 dark:active:bg-emerald-900/60";
+                }
                 return (
                   <button
                     key={key}
                     type="button"
                     disabled={disabled}
-                    onPointerDown={(e) => {
-                      e.preventDefault();
+                    onPointerDown={() => {
                       handleDown(date, time);
                     }}
                     onPointerEnter={() => handleEnter(date, time)}
-                    className={[
-                      "min-h-8 min-w-8 transition-colors",
-                      disabled
-                        ? "cursor-not-allowed bg-zinc-100 opacity-50 dark:bg-zinc-900"
-                        : "cursor-pointer bg-white hover:bg-zinc-100 dark:bg-zinc-950 dark:hover:bg-zinc-800",
-                      on && !disabled
-                        ? "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500"
-                        : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
+                    className={`${cellBase} ${cellState}`}
                     aria-label={`${date} ${time}${on ? ", 선택됨" : ""}`}
                     aria-pressed={on}
                   />
