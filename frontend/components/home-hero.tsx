@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
-import { FluidParticles } from "@/components/fluid-particles";
 import { GlowCard } from "@/components/glow-card";
 
 export type HomeHeroProps = {
@@ -10,31 +9,9 @@ export type HomeHeroProps = {
 };
 
 export function HomeHero({ children }: HomeHeroProps) {
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const mql = window.matchMedia("(prefers-color-scheme: dark)");
-    const sync = () => setIsDark(mql.matches);
-    sync();
-    mql.addEventListener("change", sync);
-    return () => mql.removeEventListener("change", sync);
-  }, []);
-
-  const particleColor = isDark ? "#a1a1aa" : "#71717a";
-  const activeColor = isDark ? "#fafafa" : "#27272a";
-
   return (
-    <section className="relative min-h-screen overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 z-0">
-        <FluidParticles
-          className="absolute inset-0 h-full w-full"
-          particleColor={particleColor}
-          activeColor={activeColor}
-        />
-        <div className="absolute inset-0 bg-background/15" aria-hidden />
-      </div>
-
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-lg flex-col px-4 py-12 sm:max-w-xl sm:py-16 lg:max-w-4xl xl:max-w-5xl">
+    <section className="relative min-h-screen">
+      <div className="relative mx-auto flex min-h-screen max-w-lg flex-col px-4 py-12 sm:max-w-xl sm:py-16 lg:max-w-4xl xl:max-w-5xl">
         <header className="text-center sm:text-left">
           <h1 className="font-service-name text-3xl font-normal tracking-normal text-foreground">
             WhenWeMeet
